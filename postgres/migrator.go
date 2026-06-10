@@ -56,7 +56,7 @@ func (m Migrator) MigrateTenantModels(tenantID string) error {
 		if err != nil {
 			return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to acquire advisory lock for tenant %s: %w", tenantID, err))
 		}
-		reset, searchPathErr := schema.SetSearchPath(tx, tenantID)
+		reset, searchPathErr := schema.SetSearchPath(tx, tenantID, m.Dialector.options.PublicSchema)
 		if searchPathErr != nil {
 			return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to set search path to tenant %s: %w", tenantID, searchPathErr))
 		}
@@ -99,7 +99,7 @@ func (m Migrator) MigrateSharedModels() error {
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to begin transaction: %w", err))
 	}
 
-	err := m.acquireXact(tx, driver.PublicSchemaName())
+	err := m.acquireXact(tx, m.Dialector.options.PublicSchema)
 	if err != nil {
 		tx.Rollback()
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to acquire advisory lock: %w", err))

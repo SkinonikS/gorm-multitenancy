@@ -131,7 +131,8 @@ func (p *postgresAdapter) RegisterModels(_ context.Context, db *gorm.DB, models 
 
 // UseTenant implements [driver.DBFactory].
 func (p *postgresAdapter) UseTenant(_ context.Context, db *gorm.DB, tenantID string) (func() error, error) {
-	return schema.SetSearchPath(db, tenantID)
+	publicSchema := db.Migrator().(*Migrator).options.PublicSchema
+	return schema.SetSearchPath(db, tenantID, publicSchema)
 }
 
 // CurrentTenant implements [driver.DBFactory].

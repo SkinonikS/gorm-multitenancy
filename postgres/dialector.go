@@ -18,6 +18,7 @@ type (
 	// By default, retry is enabled. To disable retry, set DisableRetry to true.
 	// Note that the retry logic is only applied to migrations.
 	Options struct {
+		PublicSchema string          `json:"gmt_public_schema" mapstructure:"gmt_public_schema"`
 		DisableRetry bool            `json:"gmt_disable_retry" mapstructure:"gmt_disable_retry"` // Whether to disable retry.
 		Retry        backoff.Options `json:",inline"           mapstructure:",squash"`           // Retry options.
 	}
@@ -126,9 +127,9 @@ func MigratePublicSchema(db *gorm.DB) error {
 }
 
 // MigrateTenantModels creates a new schema for a specific tenant in the PostgreSQL database.
-func MigrateTenantModels(db *gorm.DB, schemaName string) error {
+func MigrateTenantModels(db *gorm.DB, tenantID string) error {
 	return db.Connection(func(tx *gorm.DB) error {
-		return tx.Migrator().(*Migrator).MigrateTenantModels(schemaName)
+		return tx.Migrator().(*Migrator).MigrateTenantModels(tenantID)
 	})
 }
 

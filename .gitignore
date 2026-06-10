@@ -15,3 +15,6 @@ benchout*
 node_modules
 **.test
 **__debug**
+
+# IDE
+/.idea

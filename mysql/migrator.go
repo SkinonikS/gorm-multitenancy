@@ -100,11 +100,12 @@ func (m Migrator) MigrateSharedModels() (err error) {
 		return gmterrors.NewWithScheme(DriverName, errors.New("no public tables to migrate"))
 	}
 
-	if err = m.DB.Exec("CREATE DATABASE IF NOT EXISTS public").Error; err != nil {
+	createSql := fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", m.Dialector.options.PublicDatabase)
+	if err = m.DB.Exec(createSql).Error; err != nil {
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to create public database: %w", err))
 	}
 
-	unlock, lockErr := m.acquireLock(m.DB, driver.PublicSchemaName())
+	unlock, lockErr := m.acquireLock(m.DB, m.Dialector.options.PublicDatabase)
 	if lockErr != nil {
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to acquire advisory lock for public schema: %w", lockErr))
 	}
@@ -130,7 +131,8 @@ func (m Migrator) MigrateSharedModels() (err error) {
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to begin transaction: %w", err))
 	}
 
-	if err = tx.Exec("USE public").Error; err != nil {
+	useSql := fmt.Sprintf("USE %s", m.Dialector.options.PublicDatabase)
+	if err = tx.Exec(useSql).Error; err != nil {
 		tx.Rollback()
 		return gmterrors.NewWithScheme(DriverName, fmt.Errorf("failed to switch to public database: %w", err))
 	}

@@ -29,7 +29,7 @@ import (
 //	}
 //	defer reset() // reset the search path to 'public'
 //	// ... do operations with the database with the search path set to 'domain1'
-func SetSearchPath(tx *gorm.DB, schemaName string) (reset func() error, err error) {
+func SetSearchPath(tx *gorm.DB, schemaName, resetSchemaName string) (reset func() error, err error) {
 	tx = tx.Session(&gorm.Session{})
 	if schemaName == "" {
 		err = errors.New("schema name is empty")
@@ -42,7 +42,15 @@ func SetSearchPath(tx *gorm.DB, schemaName string) (reset func() error, err erro
 		_ = tx.AddError(err)
 		return nil, err
 	}
-	reset = func() error { return tx.Exec("SET search_path TO public").Error }
+	reset = func() error {
+		if schemaName == "" {
+			err = errors.New("reset schema name is empty")
+			_ = tx.AddError(err)
+			return err
+		}
+		resetSqlstr := safe.QuoteRawSQLForTenant(tx, "SET search_path TO ", resetSchemaName)
+		return tx.Exec(resetSqlstr).Error
+	}
 	return reset, nil
 }
 
