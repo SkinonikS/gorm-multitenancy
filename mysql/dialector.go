@@ -52,6 +52,10 @@ func (o *Options) apply(opts ...Option) {
 		opt(o)
 	}
 
+	if o.PublicDatabase == "" {
+		o.PublicDatabase = "public"
+	}
+
 	if !o.DisableRetry {
 		o.Retry.MaxRetries = max(o.Retry.MaxRetries, 6)
 		o.Retry.Interval = max(o.Retry.Interval, time.Second*2)
