@@ -43,7 +43,7 @@ func SetSearchPath(tx *gorm.DB, schemaName, resetSchemaName string) (reset func(
 		return nil, err
 	}
 	reset = func() error {
-		if schemaName == "" {
+		if resetSchemaName == "" {
 			err = errors.New("reset schema name is empty")
 			_ = tx.AddError(err)
 			return err
